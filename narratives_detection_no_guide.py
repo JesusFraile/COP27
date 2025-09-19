@@ -12,20 +12,16 @@ load_dotenv() # Load .env variables
 API_KEY = os.getenv("API_KEY")
 # API_KEY = os.getenv("API_KEY_2")
 MODEL_NAME='gemini-2.5-flash-lite'
-RUN_NAME='dipro_narrativas_only_6_narr_titles'
+BATCH_SIZE=800
+RUN_NAME=f'dipro_narrativas_no_guide_{BATCH_SIZE}'
 PATH_TO_SAVE=f'/data/jfraile/Programs/COP27/datasets_with_answer/{RUN_NAME}.pkl'
-BATCH_SIZE=100
+
 
 
 path='/data/jfraile/Programs/datasets/DIPROMATS_2024_T2/dipromats24_t2_train_en.json'
 with open(path) as json_data:
     data=json.load(json_data)
 
-narrative_example=[]
-for n in data['narratives']:
-    narrative_example.append(n['title'])
-
-random.shuffle(narrative_example)
 
 
 def get_prompt(tweet_batch):
@@ -36,8 +32,7 @@ Instructions:
 1. Read each tweet carefully.
 2. Determine which narratives, if any, the tweet supports. A narrative can be political, social, economic, or ideological. 
 3. If the tweet does not support any narrative, return the text NONE.
-4. The narratives should have a level of abstraction similar to these examples: {narrative_example[:6]}
-5. Output the results ONLY as a JSON object, where the keys are tweet numbers (0-{len(tweet_batch)-1}) and the values are arrays of narrative strings. Do NOT include any extra text or explanation.
+4. Output the results ONLY as a JSON object, where the keys are tweet numbers (0-{len(tweet_batch)-1}) and the values are arrays of narrative strings. Do NOT include any extra text or explanation.
 
 Example format:
 {{0: ["Narrative 1", "Narrative 2"], 1: [], 2: ["Narrative 3"], ...}}
