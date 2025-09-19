@@ -3,7 +3,7 @@ import json
 import re
 import numpy as np
 
-def load_dataset(lang):
+def load_dipromats_dataset(lang):
     RUTE_FILES='/data/jfraile/Programs'
     df_path=f'{RUTE_FILES}/datasets/DIPROMATS_2024_T2/test_dataset_{lang}.json'
     with open(df_path) as json_data:
@@ -35,3 +35,7 @@ def create_tweet_set_prompt(tweets):
 Tweet {i}. {tweet}
 """
     return t
+
+def load_cop_dataset(path):
+    df=pd.read_csv(path)
+    return df
