@@ -13,7 +13,11 @@ API_KEY = os.getenv("API_KEY")
 # API_KEY = os.getenv("API_KEY_2")
 MODEL_NAME='gemini-2.5-flash-lite'
 BATCH_SIZE=800
-RUN_NAME=f'dipro_narrativas_no_guide_{BATCH_SIZE}'
+
+
+DATASET_NAME='Tweets_per user_id-first_peak_7_11_to_12_11_2022.csv'
+RUN_NAME=f'cop_no_guide_{DATASET_NAME}'
+DATASET_PATH=f'/data/jfraile/Programs/COP27/datasets_to_process/{DATASET_NAME}'
 PATH_TO_SAVE=f'/data/jfraile/Programs/COP27/datasets_with_answer/{RUN_NAME}.pkl'
 
 
@@ -26,16 +30,22 @@ with open(path) as json_data:
 
 def get_prompt(tweet_batch):
     t=f"""
-You are an expert analyst specialised in geopolitical discourse and diplomatic communications. Your task is to analyse a list of {len(tweet_batch)} tweets from diplomats and identify which narratives each tweet explicitly or implicitly supports.
+You are an expert analyst specialised in climate diplomacy and strategic communications. Your task is to analyse a list of {len(tweet_batch)} tweets about the Climate Summit (COP27) and identify which narratives each tweet explicitly or implicitly supports.
 
 Instructions:
+
 1. Read each tweet carefully.
-2. Determine which narratives, if any, the tweet supports. A narrative can be political, social, economic, or ideological. 
-3. If the tweet does not support any narrative, return the text NONE.
-4. Output the results ONLY as a JSON object, where the keys are tweet numbers (0-{len(tweet_batch)-1}) and the values are arrays of narrative strings. Do NOT include any extra text or explanation.
+
+2. Determine which narratives, if any, the tweet supports. A narrative can be political, social, economic, or ideological.
+
+3. Use general and consistent narrative labels. If different tweets promote the same idea (e.g., "China is a great nation" and "China is a great country"), you must use only one unified narrative label for all of them.
+
+4. If the tweet does not support any narrative, return the text NONE.
+
+5. Output the results ONLY as a JSON object, where the keys are tweet numbers (0-{len(tweet_batch)-1}) and the values are arrays of narrative strings. Do NOT include any extra text or explanation.
 
 Example format:
-{{0: ["Narrative 1", "Narrative 2"], 1: [], 2: ["Narrative 3"], ...}}
+{{0: ["Narrative 1", "Narrative 2"], 1: ["NONE"], 2: ["Narrative 3"], ...}}
 
 Tweet to analyse:
 {utils.create_tweet_set_prompt(tweet_batch)}
@@ -50,12 +60,13 @@ if os.path.exists(PATH_TO_SAVE):
     print("Loaded DataFrame")
 else:
     #Load dataset
-    df=utils.load_dataset('es')
+    df=utils.load_cop_dataset(DATASET_PATH)
 
-    #n rows for debugg
-    df=df.sample(frac=1)[:BATCH_SIZE].reset_index(drop=True)
+    # #n rows for debugg
+    # df=df.sample(frac=1)[:BATCH_SIZE].reset_index(drop=True)
     
     df_answers=df.copy()
+    df_answers['narratives']=pd.Series()
     print("Created new DataFrame")
 
 
@@ -71,7 +82,7 @@ for start_idx in tqdm(range(0, len(df_answers), BATCH_SIZE)):
     
     for i, row in batch_df.iterrows():
         if utils.check_nan(row['narratives']):
-            batch_texts.append(row['text'])
+            batch_texts.append(row['Text'])
             indices_to_update.append(i)
     
     if not batch_texts:

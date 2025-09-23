@@ -13,7 +13,8 @@ def load_dipromats_dataset(lang):
         df_t2['country'].replace({'Russia':'Russia', 'China':'China', 'European Union':'EU', 'USA':'USA'}, inplace=True)
 
         df_t2['language']=lang
-        df_t2['narratives']=pd.Series()
+        df_t2.rename(columns={'text':'Text'}, inplace=True)
+        # df_t2['narratives']=pd.Series()
     return df_t2
 
 def check_nan(value):
