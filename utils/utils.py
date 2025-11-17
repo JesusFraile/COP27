@@ -40,3 +40,7 @@ Tweet {i}. {tweet}
 def load_cop_dataset(path):
     df=pd.read_csv(path)
     return df
+def load_cop_dataset_full_text(path):
+    df=pd.read_pickle(path)
+    df.rename(columns={'text':'Text'}, inplace=True)
+    return df
